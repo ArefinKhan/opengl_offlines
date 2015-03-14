@@ -4,7 +4,7 @@
 
 #include<GL/glut.h>
 
-#define g 9.8
+#define g 0.09
 #define pi 2*acos(0)
 
 double cameraHeight;
@@ -15,20 +15,16 @@ double angle;
 double translateZ;
 double sphereradius;
 double change;
+double mov;
+double time;
+double yy;
 
 struct point
 {
 	double x,y,z;
 };
 
-double initvel()
-{
-    return sqrt(2*g*90.0);
-}
-double gettime(double v)
-{
-    return v/g;
-}
+
 
 void drawAxes()
 {
@@ -249,9 +245,11 @@ void display(){
 	glColor3f(1,0,0);
 
     glTranslatef(0,0,translateZ);
-	drawsphere(sphereradius,10,10);
-	glRotatef(180,1,0,0);
-	drawsphere(sphereradius,10,10);
+    glPushMatrix();{
+        drawsphere(sphereradius,10,10);
+        glRotatef(180,1,0,0);
+        drawsphere(sphereradius,10,10);
+    } glPopMatrix();
 
 
 	//ADD this line in the end --- if you use double buffer (i.e. GL_DOUBLE)
@@ -260,17 +258,21 @@ void display(){
 
 void animate(){
 
-    if(translateZ >= 90)
-    {
-        translateZ = 90.0;
-        change = 90.0/gettime(initvel());
-        change = change * -1;
-    }
-    else if(translateZ - sphereradius <= 0)
+    //yy -= 0.07;
+    //if(yy <0) yy = 80;
+    translateZ += (mov * 0.5 * g * time*time);
+    time = time - mov/500;
+
+    if(translateZ-sphereradius <= 0)
     {
         translateZ = sphereradius;
+        mov = mov * -1;
     }
-    else translateZ = translateZ + change;
+    else if(translateZ > 80)
+    {
+        translateZ = 80;
+        mov = mov * -1;
+    }
 	//codes for any changes in Models, Camera
 	glutPostRedisplay();
 }
@@ -282,9 +284,11 @@ void init(){
 	cameraHeight=120.0;
 	cameraAngle=1.0;
 	angle=0;
-	translateZ = 95.0;
+	time = 0.0;
+	translateZ = 80.0;
 	sphereradius = 5.0;
-
+	mov = -1;
+    yy = 80;
 	//clear the screen
 	glClearColor(0,0,0,0);
 

@@ -10,14 +10,20 @@ double cameraAngle;
 int drawgrid;
 int drawaxes;
 double angle;
-double squareSide;
-double cylRadius,cylHeight,cylRefX,cylRefY;
-double xup,yup,zup;
-double separation;
-double cubeX,cubeY,cubeZ;
-double radius,stacks,slices;
-double cylSeparation;
-double bottomSphereZ, topSphereZ;
+
+struct Cube{
+    double side;
+    double MAX;
+    double repX,repY,repZ;
+};
+struct Curvature{
+    double radius;
+    double height;
+    double slices,stacks;
+};
+
+Cube cube;
+Curvature curve;
 
 struct point
 {
@@ -99,7 +105,7 @@ void drawsphere(float radius,int slices,int stacks)
 	    //glColor3f((double)i/(double)stacks,(double)i/(double)stacks,(double)i/(double)stacks);
 		for(j=0;j<slices/4;j++)
 		{
-			glColor3f(1.0,1.0,(double)i/stacks);
+			glColor3f(0.5,(double)i/stacks,0.5);
 			glBegin(GL_QUADS);{
 				glVertex3f(points[i][j].x,points[i][j].y,points[i][j].z);
 				glVertex3f(points[i][j+1].x,points[i][j+1].y,points[i][j+1].z);
@@ -117,7 +123,7 @@ void drawFilledCircle(GLfloat x, GLfloat y, GLfloat radius,double height){
 
 	//GLfloat radius = 0.8f; //radius
 	GLfloat twicePi = 2.0f * pi;
-    glColor3ub(0,255,255);
+    glColor3ub(139,58,58);
 	glBegin(GL_TRIANGLE_FAN); {
         double zcomp = 0.0;
         for(j=0; ; j++)
@@ -135,13 +141,13 @@ void drawFilledCircle(GLfloat x, GLfloat y, GLfloat radius,double height){
 
 void drawCylinder()
 {
-    drawFilledCircle(0,0,cylRadius,cylHeight);
+    drawFilledCircle(0,0,curve.radius,curve.height);
 }
 
 void drawSquare(double squareSide,int opt)
 {
     if(opt == 1) glColor3ub(139,0,0);
-    else if(opt == 2) glColor3ub(255,0,0);
+    else if(opt == 2) glColor3ub(205,38,38);
     else glColor3ub(139,35,35);
     glBegin(GL_QUADS);{
         glVertex3f(0,0,0);
@@ -154,24 +160,35 @@ void drawSquare(double squareSide,int opt)
 void DRAWCUBE()
 {
     glPushMatrix();{
-        glTranslatef(cubeX,cubeY,cubeZ);
+        //glTranslatef(cube.repX,cube.repY,cube.repZ);
         glPushMatrix();{
-            drawSquare(squareSide,1);
             glPushMatrix();{
-                glTranslatef(0,0,squareSide);
-                drawSquare(squareSide,1);
+                glTranslatef((cube.MAX-cube.side)/2,(cube.MAX-cube.side)/2,0);
+                drawSquare(cube.side,1);  // bottom surface
             }glPopMatrix();
-            glRotatef(90,1,0,0);
-            drawSquare(squareSide,2);
             glPushMatrix();{
-                glTranslatef(0,0,-squareSide);
-                drawSquare(squareSide,2);
+                glTranslatef((cube.MAX-cube.side)/2,(cube.MAX-cube.side)/2,cube.MAX);
+                drawSquare(cube.side,1);    // top surface
             }glPopMatrix();
-            glRotatef(90,0,1,0);
-            drawSquare(squareSide,3);
             glPushMatrix();{
-                glTranslatef(0,0,squareSide);
-                drawSquare(squareSide,3);
+                glTranslatef((cube.MAX-cube.side)/2,0,(cube.MAX-cube.side)/2);
+                glRotatef(90,1,0,0);
+                drawSquare(cube.side,2);    // surface parallel to x - near
+            }glPopMatrix();
+            glPushMatrix();{
+                glTranslatef((cube.MAX-cube.side)/2,cube.MAX,(cube.MAX-cube.side)/2);
+                glRotatef(90,1,0,0);        // surface parallel to x - furthest
+                drawSquare(cube.side,2);
+            }glPopMatrix();
+            glPushMatrix();{
+                glTranslatef(0,(cube.MAX-cube.side)/2,(cube.MAX-cube.side)/2);
+                glRotatef(-90,0,1,0);
+                drawSquare(cube.side,3);        // surface parallel to y axis - near
+            }glPopMatrix();
+            glPushMatrix();{
+                glTranslatef(cube.MAX,(cube.MAX-cube.side)/2,(cube.MAX-cube.side)/2);
+                glRotatef(-90,0,1,0);
+                drawSquare(cube.side,3);        // surface parallel to y axis - furthest
             }glPopMatrix();
         }glPopMatrix();
     } glPopMatrix();
@@ -180,62 +197,62 @@ void DRAWCUBE()
 void DRAWCYLINDERS()
 {
     glPushMatrix();{
-        glTranslatef(cylRefX,cylRefY,2);
+        //glTranslatef(cylRefX,cylRefY,2);
         glPushMatrix();{
-            glTranslatef(0,0,zup);
+            glTranslatef((cube.MAX-cube.side)/2,(cube.MAX-cube.side)/2,(cube.MAX-cube.side)/2);
+            drawCylinder();
+        } glPopMatrix();
+        glPushMatrix();{
+            glTranslatef(cube.MAX - (cube.MAX-cube.side)/2,(cube.MAX-cube.side)/2,(cube.MAX-cube.side)/2);
+            drawCylinder();
+        } glPopMatrix();
+        glPushMatrix();{
+            glTranslatef(cube.MAX - (cube.MAX-cube.side)/2,cube.MAX - (cube.MAX-cube.side)/2,(cube.MAX-cube.side)/2);
             drawCylinder();     // parallel to z axis
         } glPopMatrix();
         glPushMatrix();{
-            glTranslatef(0,cylSeparation,zup);
+            glTranslatef((cube.MAX-cube.side)/2,cube.MAX - (cube.MAX-cube.side)/2,(cube.MAX-cube.side)/2);
             drawCylinder();     // parallel to z axis
         } glPopMatrix();
         glPushMatrix();{
-            glTranslatef(cylSeparation,cylSeparation,zup);
-            drawCylinder();     // parallel to z axis
-        } glPopMatrix();
-        glPushMatrix();{
-            glTranslatef(cylSeparation,0,zup);
-            drawCylinder();     // parallel to z axis
-        } glPopMatrix();
-        glPushMatrix();{
-            glTranslatef(0,yup,0);
+            glTranslatef((cube.MAX-cube.side)/2,(cube.MAX-cube.side)/2,(cube.MAX-cube.side)/2);
             glRotatef(-90,1,0,0);
-            drawCylinder();     // parallel to y axis
+            drawCylinder();
         } glPopMatrix();
         glPushMatrix();{
-            glTranslatef(0,yup,cylSeparation);
+            glTranslatef((cube.MAX-cube.side)/2,(cube.MAX-cube.side)/2,cube.MAX - (cube.MAX-cube.side)/2);
             glRotatef(-90,1,0,0);
-            drawCylinder();     // parallel to y axis
+            drawCylinder();
         } glPopMatrix();
         glPushMatrix();{
-            glTranslatef(cylSeparation,yup,cylSeparation);
+            glTranslatef(cube.MAX - (cube.MAX-cube.side)/2,(cube.MAX-cube.side)/2,(cube.MAX-cube.side)/2);
             glRotatef(-90,1,0,0);
-            drawCylinder();     // parallel to y axis
+            drawCylinder();
         } glPopMatrix();
         glPushMatrix();{
-            glTranslatef(cylSeparation,yup,0);
+            glTranslatef(cube.MAX - (cube.MAX-cube.side)/2,(cube.MAX-cube.side)/2,cube.MAX - (cube.MAX-cube.side)/2);
             glRotatef(-90,1,0,0);
-            drawCylinder();     // parallel to y axis
+            drawCylinder();
         } glPopMatrix();
         glPushMatrix();{
-            glTranslatef(xup,0,0);
+            glTranslatef((cube.MAX-cube.side)/2,(cube.MAX-cube.side)/2,(cube.MAX-cube.side)/2);
             glRotatef(90,0,1,0);
-            drawCylinder();     // parallel to x axis
+            drawCylinder();
         } glPopMatrix();
         glPushMatrix();{
-            glTranslatef(xup,0,cylSeparation);
+            glTranslatef((cube.MAX-cube.side)/2,(cube.MAX-cube.side)/2,cube.MAX - (cube.MAX-cube.side)/2);
             glRotatef(90,0,1,0);
-            drawCylinder();     // parallel to x axis
+            drawCylinder();
         } glPopMatrix();
         glPushMatrix();{
-            glTranslatef(xup,cylSeparation,0);
+            glTranslatef((cube.MAX-cube.side)/2,cube.MAX - (cube.MAX-cube.side)/2,(cube.MAX-cube.side)/2);
             glRotatef(90,0,1,0);
-            drawCylinder();     // parallel to x axis
+            drawCylinder();
         } glPopMatrix();
         glPushMatrix();{
-            glTranslatef(xup,cylSeparation,cylSeparation);
+            glTranslatef((cube.MAX-cube.side)/2,cube.MAX - (cube.MAX-cube.side)/2,cube.MAX - (cube.MAX-cube.side)/2);
             glRotatef(90,0,1,0);
-            drawCylinder();     // parallel to x axis
+            drawCylinder();
         } glPopMatrix();
     } glPopMatrix();
 }
@@ -244,55 +261,50 @@ void DRAWPARTSPHERE()
 {
     glPushMatrix();{
         glPushMatrix();{
-            glTranslatef(7,7,topSphereZ);
             glPushMatrix();{
-                glPushMatrix();{
-                    glTranslatef(separation,separation,0);
-                    drawsphere(radius,slices,stacks);
-                } glPopMatrix();
-                glPushMatrix();{
-                    glTranslatef(-1*separation,-1*separation,0);
-                    glRotatef(180,0,0,1);
-                    drawsphere(radius,slices,stacks);
-                }glPopMatrix();
-                glPushMatrix();{
-                    glTranslatef(-1*separation,separation,0);
-                    glRotatef(90,0,0,1);
-                    drawsphere(radius,slices,stacks);
-                }glPopMatrix();
-                glPushMatrix();{
-                    glTranslatef(separation,-1*separation,0);
-                    glRotatef(-90,0,0,1);
-                    drawsphere(radius,slices,stacks);
-                }glPopMatrix();
+                glTranslatef(cube.MAX - (cube.MAX-cube.side)/2,cube.MAX - (cube.MAX-cube.side)/2,cube.MAX - (cube.MAX-cube.side)/2);
+                drawsphere(curve.radius,curve.slices,curve.stacks);
             } glPopMatrix();
-        }glPopMatrix();
+            glPushMatrix();{
+                glTranslatef((cube.MAX-cube.side)/2,(cube.MAX-cube.side)/2,cube.MAX - (cube.MAX-cube.side)/2);
+                glRotatef(180,0,0,1);
+                drawsphere(curve.radius,curve.slices,curve.stacks);
+            }glPopMatrix();
+            glPushMatrix();{
+                glTranslatef((cube.MAX-cube.side)/2,cube.MAX - (cube.MAX-cube.side)/2,cube.MAX - (cube.MAX-cube.side)/2);
+                glRotatef(90,0,0,1);
+                drawsphere(curve.radius,curve.slices,curve.stacks);
+            }glPopMatrix();
+            glPushMatrix();{
+                glTranslatef(cube.MAX - (cube.MAX-cube.side)/2,(cube.MAX-cube.side)/2,cube.MAX - (cube.MAX-cube.side)/2);
+                glRotatef(-90,0,0,1);
+                drawsphere(curve.radius,curve.slices,curve.stacks);
+            }glPopMatrix();
+        } glPopMatrix();
+
         glPushMatrix();{
-            glTranslatef(7,7,bottomSphereZ);
-            glRotatef(180,1,0,0);
             glPushMatrix();{
-                glPushMatrix();{
-                    glTranslatef(separation,separation,0);
-                    drawsphere(radius,slices,stacks);
-                } glPopMatrix();
-                glPushMatrix();{
-                    glTranslatef(-1*separation,-1*separation,0);
-                    glRotatef(180,0,0,1);
-                    drawsphere(radius,slices,stacks);
-                }glPopMatrix();
-                glPushMatrix();{
-                    glTranslatef(-1*separation,separation,0);
-                    glRotatef(90,0,0,1);
-                    drawsphere(radius,slices,stacks);
-                }glPopMatrix();
-                glPushMatrix();{
-                    glTranslatef(separation,-1*separation,0);
-                    glRotatef(-90,0,0,1);
-                    drawsphere(radius,slices,stacks);
-                }glPopMatrix();
+                glTranslatef(cube.MAX - (cube.MAX-cube.side)/2,(cube.MAX-cube.side)/2,(cube.MAX-cube.side)/2);
+                glRotatef(180,1,0,0);
+                drawsphere(curve.radius,curve.slices,curve.stacks);
             } glPopMatrix();
-        }glPopMatrix();
-	} glPopMatrix();
+            glPushMatrix();{
+                glTranslatef((cube.MAX-cube.side)/2,cube.MAX - (cube.MAX-cube.side)/2,(cube.MAX-cube.side)/2);
+                glRotatef(180,0,1,0);
+                drawsphere(curve.radius,curve.slices,curve.stacks);
+            }glPopMatrix();
+            glPushMatrix();{
+                glTranslatef(cube.MAX - (cube.MAX-cube.side)/2,cube.MAX - (cube.MAX-cube.side)/2,(cube.MAX-cube.side)/2);
+                glRotatef(180,1,1,0);
+                drawsphere(curve.radius,curve.slices,curve.stacks);
+            }glPopMatrix();
+            glPushMatrix();{
+                glTranslatef((cube.MAX-cube.side)/2,(cube.MAX-cube.side)/2,(cube.MAX-cube.side)/2);
+                glRotatef(180,0,0,0);
+                drawsphere(curve.radius,curve.slices,curve.stacks);
+            }glPopMatrix();
+        } glPopMatrix();
+    }glPopMatrix();
 }
 
 void keyboardListener(unsigned char key, int x,int y){
@@ -325,37 +337,11 @@ void specialKeyListener(int key, int x,int y){
 			break;
 
 		case GLUT_KEY_PAGE_UP:
-		    //cameraAngle += 0.03;
-		    //if(squareSide<=20) squareSide += 2,zup+=0.2,yup+=0.2,xup+=0.2;
-            //if(cylRadius >= 1) cylRadius -= 0.5,cylHeight+=0.8;
-            //if(separation<=4.5) separation += 0.5, radius -= 0.5;
-            if(separation >= 0.8)
-            {
-                separation -= 0.8, radius += 1.8, squareSide -= 4, cylSeparation--, cylRefX+=0.4,cylRefY+=0.4;
-                double var = cubeX;
-                var += 1.2;
-                cubeX = cubeY = cubeZ = var;
-                topSphereZ-=2;
-                bottomSphereZ+=2;
-                if(topSphereZ<bottomSphereZ) topSphereZ = 6,bottomSphereZ = 6;
-            }
+            if(cube.side>0) cube.side--, curve.radius+=0.5;
 			break;
 		case GLUT_KEY_PAGE_DOWN:
-		    //cameraAngle -= 0.03;
-		    //if(squareSide>=2) squareSide -= 2,zup -= 0.2,yup-=0.2,xup=-0.2;
-		    //if(cylRadius<=2) cylRadius += 0.5,cylHeight-=0.8;
-            if(separation <= 2.40001)
-            {
-
-                separation += 0.8, radius -= 1.8, squareSide += 4, cylSeparation++,cylRefX-=0.4,cylRefY-=0.4;
-                double var = cubeX;
-                var -= 1.2;
-                cubeX = cubeY = cubeZ = var;
-                topSphereZ+=2;
-                bottomSphereZ-=2;
-                //printf("%f %f\n",topSphereZ,bottomSphereZ);
-                if(topSphereZ>=12 && bottomSphereZ<=2) topSphereZ = 12,bottomSphereZ = 2;
-            }
+            if(cube.side<cube.MAX) cube.side++, curve.radius-=0.5;
+            if(cube.side >= cube.MAX) curve.radius = 0;
 			break;
 
 		case GLUT_KEY_INSERT:
@@ -419,7 +405,7 @@ void display(){
 	//3. Which direction is the camera's UP direction?
 
 	//gluLookAt(100,100,100,	0,0,0,	0,0,1);
-	gluLookAt(100*cos(cameraAngle), 100*sin(cameraAngle), cameraHeight,		0,0,0,		0,0,1);
+	gluLookAt(150*cos(cameraAngle), 150*sin(cameraAngle), cameraHeight,		0,0,0,		0,0,1);
 	//gluLookAt(0,-1,150,	0,0,0,	0,0,1);
 
 
@@ -443,6 +429,7 @@ void display(){
 void animate(){
 	//angle+=0.05;
 	//codes for any changes in Models, Camera
+	curve.height = cube.side;
 	glutPostRedisplay();
 }
 
@@ -450,26 +437,18 @@ void init(){
 	//codes for initialization
 	drawgrid=0;
 	drawaxes=1;
-	cameraHeight=25.0;
+	cameraHeight=100.0;
 	cameraAngle=1.0;
 	angle=0;
-    squareSide = 16.0;
-    cylRadius = 1.5;
-    cylHeight = 8.0;
-    cylSeparation = 10.0;
-    zup = 2;
-    yup = 2;
-    xup = 2;
-    separation = 3.2;
-    radius = 2;
-    stacks = 30;
-    slices = 20;
-    topSphereZ = 12;
-    bottomSphereZ = 2;
+	cube.MAX = 60;
+	cube.side = cube.MAX/2;
+    cube.repX = cube.repY = cube.repZ = cube.side/2;
+    curve.radius = 15;
+    curve.height = cube.side;
+    curve.slices = 20;
+    curve.stacks = 10;
 	//clear the screen
 	glClearColor(0,0,0,0);
-	cubeX = cubeY = cubeZ = 0;
-    cylRefX = cylRefY = 2;
 	/************************
 	/ set-up projection here
 	************************/

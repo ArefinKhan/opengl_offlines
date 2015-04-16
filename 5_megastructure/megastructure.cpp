@@ -1,14 +1,11 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<math.h>
+#include <vector>
 #include<GL/glut.h>
-
+using namespace std;
 #define pi 2*acos(0)
 
-#define BASESCALE 50
-#define INNERBASESCALE 47
-#define PINK_WALK_WAY 44
-#define WATER_BORDER 38
 
 double cameraHeight;
 double cameraAngle;
@@ -20,8 +17,14 @@ double angle;
 struct point
 {
 	double x,y,z;
+	point(double a,double b,double c)
+	{
+	    x = a/1000.0;
+	    y = b/1000.0;
+	    z = c/1000.0;
+	}
 };
-
+vector <point> points;
 
 void drawAxes()
 {
@@ -146,94 +149,39 @@ void mouseListener(int button, int state, int x, int y){	//x, y is the x-y of th
 
 void DRAW_BASEMENT()
 {
-    double zindex = 0.0;
-    for(int i=0; i<20; i++)
+    int i;
+    int n = points.size() - 1;
+    for(i = 1; i<=n; i++)
     {
+        point p1 = points[i];
+        point p2 = points[i-1];
         glPushMatrix();{
-            glTranslatef(0,0,zindex);
-            glPushMatrix();{
-                 glColor3ub(0,128+(i*3),i);
-                 glScalef(BASESCALE-(i*0.7), BASESCALE-(i*0.7),0.0);
-                 glutSolidTetrahedron();
-            }glPopMatrix();
-            glPushMatrix();{
-                glRotatef(45,0,0,1);
-                glColor3ub(0,128+(i*3),i);
-                glScalef(BASESCALE-(i*0.7), BASESCALE-(i*0.7),0.0);
-                glutSolidTetrahedron();
-            }glPopMatrix();
+            glColor3f(0, 0, 0);
+            glBegin(GL_LINES);{
+                glVertex3f(p1.x,p1.y,p1.z);
+                glVertex3f(p2.x,p2.y,p2.z);
+            }glEnd();
         }glPopMatrix();
-        zindex += 0.1;
     }
+    point p1 = points[0];
+    point p2 = points[n];
+    glPushMatrix();{
+        glColor3f(0, 0, 0);
+        glBegin(GL_LINES);{
+            glVertex3f(p1.x,p1.y,p1.z);
+            glVertex3f(p2.x,p2.y,p2.z);
+        }glEnd();
+    }glPopMatrix();
 }
 
 void DRAW_WALKWAY()
 {
-    double zindex = 0.0;
-    double pinkwalk = 0.0;
-    for(int i=0; i<20; i++)
-    {
-        zindex += 0.1;
-        pinkwalk = BASESCALE-(i*0.7);
-    }
 
-    glPushMatrix();{
-        glTranslatef(0,0,zindex);
-        glColor3ub(238,162,173);
-        glScalef(pinkwalk, pinkwalk,0.0);
-        glutSolidTetrahedron();
-    }glPopMatrix();
-    glPushMatrix();{
-        glTranslatef(0,0,zindex);
-        glRotatef(45,0,0,1);
-        glColor3ub(238,162,173);
-        glScalef(pinkwalk, pinkwalk,0.0);
-        glutSolidTetrahedron();
-    }glPopMatrix();
-
-    glPushMatrix();{
-        glTranslatef(0,0,zindex + 0.05);
-        glColor3ub(0,205,0);
-        glScalef(pinkwalk-2, pinkwalk-2,0.0);
-        glutSolidTetrahedron();
-    }glPopMatrix();
-    glPushMatrix();{
-        glTranslatef(0,0,zindex + 0.05);
-        glRotatef(45,0,0,1);
-        glColor3ub(0,205,0);
-        glScalef(pinkwalk-2, pinkwalk-2,0.0);
-        glutSolidTetrahedron();
-    }glPopMatrix();
 }
 
 void DRAW_WATERBODY()
 {
-    glPushMatrix();{
-        glTranslatef(0,0,1.8);
-        glColor3ub(238,162,173);
-        glScalef(WATER_BORDER, WATER_BORDER,0.0);
-        glutSolidTetrahedron();
-    }glPopMatrix();
-    glPushMatrix();{
-        glTranslatef(0,0,1.8);
-        glRotatef(45,0,0,1);
-        glColor3ub(238,162,173);
-        glScalef(WATER_BORDER, WATER_BORDER,0.0);
-        glutSolidTetrahedron();
-    }glPopMatrix();
-    glPushMatrix();{
-        glTranslatef(0,0,1.9);
-        glColor3ub(0,197,205);
-        glScalef(WATER_BORDER-1, WATER_BORDER-1,0.0);
-        glutSolidTetrahedron();
-    }glPopMatrix();
-    glPushMatrix();{
-        glTranslatef(0,0,1.9);
-        glRotatef(45,0,0,1);
-        glColor3ub(0,197,205);
-        glScalef(WATER_BORDER-1, WATER_BORDER-1,0.0);
-        glutSolidTetrahedron();
-    }glPopMatrix();
+
 }
 
 void display(){
@@ -312,7 +260,21 @@ void init(){
 	//far distance
 }
 
+void input()
+{
+    double a,b,c;
+    while(scanf("%lf %lf %lf",&a,&b,&c)!=EOF)
+    {
+        point p(a,b,c);
+        printf("%f %f %f\n",p.x,p.y,p.z);
+        points.push_back(p);
+    }
+}
+
 int main(int argc, char **argv){
+    freopen("coordinates.txt","r",stdin);
+    freopen("output.txt","w",stdout);
+    input();
 	glutInit(&argc,argv);
 	glutInitWindowSize(850, 700);
 	glutInitWindowPosition(0, 0);

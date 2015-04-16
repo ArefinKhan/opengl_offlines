@@ -146,59 +146,62 @@ void mouseListener(int button, int state, int x, int y){	//x, y is the x-y of th
 
 void DRAW_BASEMENT()
 {
-    glPushMatrix();{
-         glColor3ub(0,128,0);
-         glScalef(BASESCALE, BASESCALE,0.0);
-         glutSolidTetrahedron();
-    }glPopMatrix();
-    glPushMatrix();{
-        glRotatef(45,0,0,1);
-        glColor3ub(0,128,0);
-        glScalef(BASESCALE, BASESCALE,0.0);
-        glutSolidTetrahedron();
-    }glPopMatrix();
-    glPushMatrix();{
-        glTranslatef(0,0,1);
-        glColor3ub(0,205,0);
-        glScalef(INNERBASESCALE, INNERBASESCALE,0.0);
-        glutSolidTetrahedron();
-    }glPopMatrix();
-    glPushMatrix();{
-        glTranslatef(0,0,1);
-        glRotatef(45,0,0,1);
-        glColor3ub(0,205,0);
-        glScalef(INNERBASESCALE, INNERBASESCALE,0.0);
-        glutSolidTetrahedron();
-    }glPopMatrix();
-
+    double zindex = 0.0;
+    for(int i=0; i<20; i++)
+    {
+        glPushMatrix();{
+            glTranslatef(0,0,zindex);
+            glPushMatrix();{
+                 glColor3ub(0,128+(i*3),i);
+                 glScalef(BASESCALE-(i*0.7), BASESCALE-(i*0.7),0.0);
+                 glutSolidTetrahedron();
+            }glPopMatrix();
+            glPushMatrix();{
+                glRotatef(45,0,0,1);
+                glColor3ub(0,128+(i*3),i);
+                glScalef(BASESCALE-(i*0.7), BASESCALE-(i*0.7),0.0);
+                glutSolidTetrahedron();
+            }glPopMatrix();
+        }glPopMatrix();
+        zindex += 0.1;
+    }
 }
 
 void DRAW_WALKWAY()
 {
+    double zindex = 0.0;
+    double pinkwalk = 0.0;
+    for(int i=0; i<20; i++)
+    {
+        zindex += 0.1;
+        pinkwalk = BASESCALE-(i*0.7);
+    }
+
     glPushMatrix();{
-        glTranslatef(0,0,1.5);
+        glTranslatef(0,0,zindex);
         glColor3ub(238,162,173);
-        glScalef(PINK_WALK_WAY, PINK_WALK_WAY,0.0);
+        glScalef(pinkwalk, pinkwalk,0.0);
         glutSolidTetrahedron();
     }glPopMatrix();
     glPushMatrix();{
-        glTranslatef(0,0,1.5);
+        glTranslatef(0,0,zindex);
         glRotatef(45,0,0,1);
         glColor3ub(238,162,173);
-        glScalef(PINK_WALK_WAY, PINK_WALK_WAY,0.0);
+        glScalef(pinkwalk, pinkwalk,0.0);
         glutSolidTetrahedron();
     }glPopMatrix();
+
     glPushMatrix();{
-        glTranslatef(0,0,1.7);
+        glTranslatef(0,0,zindex + 0.05);
         glColor3ub(0,205,0);
-        glScalef(PINK_WALK_WAY-2, PINK_WALK_WAY-2,0.0);
+        glScalef(pinkwalk-2, pinkwalk-2,0.0);
         glutSolidTetrahedron();
     }glPopMatrix();
     glPushMatrix();{
-        glTranslatef(0,0,1.7);
+        glTranslatef(0,0,zindex + 0.05);
         glRotatef(45,0,0,1);
         glColor3ub(0,205,0);
-        glScalef(PINK_WALK_WAY-2, PINK_WALK_WAY-2,0.0);
+        glScalef(pinkwalk-2, pinkwalk-2,0.0);
         glutSolidTetrahedron();
     }glPopMatrix();
 }
@@ -221,14 +224,14 @@ void DRAW_WATERBODY()
     glPushMatrix();{
         glTranslatef(0,0,1.9);
         glColor3ub(0,197,205);
-        glScalef(WATER_BORDER-2, WATER_BORDER-2,0.0);
+        glScalef(WATER_BORDER-1, WATER_BORDER-1,0.0);
         glutSolidTetrahedron();
     }glPopMatrix();
     glPushMatrix();{
         glTranslatef(0,0,1.9);
         glRotatef(45,0,0,1);
         glColor3ub(0,197,205);
-        glScalef(WATER_BORDER-2, WATER_BORDER-2,0.0);
+        glScalef(WATER_BORDER-1, WATER_BORDER-1,0.0);
         glutSolidTetrahedron();
     }glPopMatrix();
 }
@@ -262,9 +265,10 @@ void display(){
 	//again select MODEL-VIEW
 	glMatrixMode(GL_MODELVIEW);
 
+
     DRAW_BASEMENT();
     DRAW_WALKWAY();
-    DRAW_WATERBODY();
+    //DRAW_WATERBODY();
 
 	/****************************
 	/ Add your objects from here

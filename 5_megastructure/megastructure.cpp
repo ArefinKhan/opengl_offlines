@@ -23,8 +23,10 @@ struct point
 	    y = b/1000.0;
 	    z = c/1000.0;
 	}
+	point() {}
 };
-vector <point> points;
+vector <point> points_basement_bottom,points_basement_top,points_walkway_top_outer,points_walkway_top_inner;
+vector <point> points_walkway_bottom_outer,points_walkway_bottom_inner;
 
 void drawAxes()
 {
@@ -150,11 +152,11 @@ void mouseListener(int button, int state, int x, int y){	//x, y is the x-y of th
 void DRAW_BASEMENT()
 {
     int i;
-    int n = points.size() - 1;
+    int n = points_basement_bottom.size() - 1;
     for(i = 1; i<=n; i++)
     {
-        point p1 = points[i];
-        point p2 = points[i-1];
+        point p1 = points_basement_bottom[i];
+        point p2 = points_basement_bottom[i-1];
         glPushMatrix();{
             glColor3f(0, 0, 0);
             glBegin(GL_LINES);{
@@ -163,8 +165,8 @@ void DRAW_BASEMENT()
             }glEnd();
         }glPopMatrix();
     }
-    point p1 = points[0];
-    point p2 = points[n];
+    point p1 = points_basement_bottom[0];
+    point p2 = points_basement_bottom[n];
     glPushMatrix();{
         glColor3f(0, 0, 0);
         glBegin(GL_LINES);{
@@ -172,11 +174,148 @@ void DRAW_BASEMENT()
             glVertex3f(p2.x,p2.y,p2.z);
         }glEnd();
     }glPopMatrix();
+
+    n = points_basement_top.size() - 1;
+    for(i = 1; i<=n; i++)
+    {
+        p1 = points_basement_top[i];
+        p2 = points_basement_top[i-1];
+        glPushMatrix();{
+            glColor3f(0, 0, 0);
+            glBegin(GL_LINES);{
+                glVertex3f(p1.x,p1.y,p1.z);
+                glVertex3f(p2.x,p2.y,p2.z);
+            }glEnd();
+        }glPopMatrix();
+    }
+    p1 = points_basement_top[0];
+    p2 = points_basement_top[n];
+    glPushMatrix();{
+        glColor3f(0, 0, 0);
+        glBegin(GL_LINES);{
+            glVertex3f(p1.x,p1.y,p1.z);
+            glVertex3f(p2.x,p2.y,p2.z);
+        }glEnd();
+    }glPopMatrix();
+
+    for(i=1; i+1<=n; i+=3)
+    {
+        p1 = points_basement_top[i];
+        p2 = points_basement_bottom[i];
+        glPushMatrix();{
+            glColor3f(0, 0, 0);
+            glBegin(GL_LINES);{
+                glVertex3f(p1.x,p1.y,p1.z);
+                glVertex3f(p2.x,p2.y,p2.z);
+            }glEnd();
+        }glPopMatrix();
+        p1 = points_basement_top[i+1];
+        p2 = points_basement_bottom[i+1];
+        glPushMatrix();{
+            glColor3f(0, 0, 0);
+            glBegin(GL_LINES);{
+                glVertex3f(p1.x,p1.y,p1.z);
+                glVertex3f(p2.x,p2.y,p2.z);
+            }glEnd();
+        }glPopMatrix();
+    }
 }
 
 void DRAW_WALKWAY()
 {
+    int i,n;
+    n = points_walkway_top_outer.size() - 1;
+    point p1,p2;
+    for(i=1; i<=n; i++)
+    {
+        p1 = points_walkway_top_outer[i];
+        p2 = points_walkway_top_outer[i-1];
+        glPushMatrix();{
+            glColor3f(0, 0, 0);
+            glBegin(GL_LINES);{
+                glVertex3f(p1.x,p1.y,p1.z);
+                glVertex3f(p2.x,p2.y,p2.z);
+            }glEnd();
+        }glPopMatrix();
+    }
+    p1 = points_walkway_top_outer[0];
+    p2 = points_walkway_top_outer[n];
+    glPushMatrix();{
+        glColor3f(0, 0, 0);
+        glBegin(GL_LINES);{
+            glVertex3f(p1.x,p1.y,p1.z);
+            glVertex3f(p2.x,p2.y,p2.z);
+        }glEnd();
+    }glPopMatrix();
 
+    n = points_walkway_top_inner.size() - 1;
+    for(i=1; i<=n; i++)
+    {
+        p1 = points_walkway_top_inner[i];
+        p2 = points_walkway_top_inner[i-1];
+        glPushMatrix();{
+            glColor3f(0, 0, 0);
+            glBegin(GL_LINES);{
+                glVertex3f(p1.x,p1.y,p1.z);
+                glVertex3f(p2.x,p2.y,p2.z);
+            }glEnd();
+        }glPopMatrix();
+    }
+    p1 = points_walkway_top_inner[0];
+    p2 = points_walkway_top_inner[n];
+    glPushMatrix();{
+        glColor3f(0, 0, 0);
+        glBegin(GL_LINES);{
+            glVertex3f(p1.x,p1.y,p1.z);
+            glVertex3f(p2.x,p2.y,p2.z);
+        }glEnd();
+    }glPopMatrix();
+
+    n = points_walkway_bottom_outer.size() - 1;
+    for(i=1; i<=n; i++)
+    {
+        p1 = points_walkway_bottom_outer[i];
+        p2 = points_walkway_bottom_outer[i-1];
+        glPushMatrix();{
+            glColor3f(0, 0, 0);
+            glBegin(GL_LINES);{
+                glVertex3f(p1.x,p1.y,p1.z);
+                glVertex3f(p2.x,p2.y,p2.z);
+            }glEnd();
+        }glPopMatrix();
+    }
+    p1 = points_walkway_bottom_outer[0];
+    p2 = points_walkway_bottom_outer[n];
+    glPushMatrix();{
+        glColor3f(0, 0, 0);
+        glBegin(GL_LINES);{
+            glVertex3f(p1.x,p1.y,p1.z);
+            glVertex3f(p2.x,p2.y,p2.z);
+        }glEnd();
+    }glPopMatrix();
+
+    n = points_walkway_bottom_inner.size() - 1;
+    for(i=1; i<=n; i++)
+    {
+        p1 = points_walkway_bottom_inner[i];
+        p2 = points_walkway_bottom_inner[i-1];
+        glPushMatrix();{
+            glColor3f(0, 0, 0);
+            glBegin(GL_LINES);{
+                glVertex3f(p1.x,p1.y,p1.z);
+                glVertex3f(p2.x,p2.y,p2.z);
+            }glEnd();
+        }glPopMatrix();
+    }
+    p1 = points_walkway_bottom_inner[0];
+    p2 = points_walkway_bottom_inner[n];
+    glPushMatrix();{
+        glColor3f(0, 0, 0);
+        glBegin(GL_LINES);{
+            glVertex3f(p1.x,p1.y,p1.z);
+            glVertex3f(p2.x,p2.y,p2.z);
+        }glEnd();
+    }glPopMatrix();
 }
 
 void DRAW_WATERBODY()
@@ -266,15 +405,82 @@ void input()
     while(scanf("%lf %lf %lf",&a,&b,&c)!=EOF)
     {
         point p(a,b,c);
-        printf("%f %f %f\n",p.x,p.y,p.z);
-        points.push_back(p);
+        //printf("%f %f %f\n",p.x,p.y,p.z);
+        points_basement_bottom.push_back(p);
+    }
+}
+void input2()
+{
+    double a,b,c;
+    while(scanf("%lf %lf %lf",&a,&b,&c)!=EOF)
+    {
+        point p(a,b,c);
+        //printf("%f %f %f\n",p.x,p.y,p.z);
+        points_basement_top.push_back(p);
+    }
+}
+
+void input3()
+{
+    double a,b,c;
+    while(scanf("%lf %lf %lf",&a,&b,&c)!=EOF)
+    {
+        point p(a,b,c);
+        //printf("%f %f %f\n",p.x,p.y,p.z);
+        points_walkway_top_outer.push_back(p);
+    }
+}
+void input4()
+{
+    double a,b,c;
+    while(scanf("%lf %lf %lf",&a,&b,&c)!=EOF)
+    {
+        point p(a,b,c);
+        //printf("%f %f %f\n",p.x,p.y,p.z);
+        points_walkway_top_inner.push_back(p);
+    }
+}
+void input5()
+{
+    double a,b,c;
+    while(scanf("%lf %lf %lf",&a,&b,&c)!=EOF)
+    {
+        point p(a,b,c);
+        //printf("%f %f %f\n",p.x,p.y,p.z);
+        points_walkway_bottom_outer.push_back(p);
+    }
+}
+void input6()
+{
+    double a,b,c;
+    while(scanf("%lf %lf %lf",&a,&b,&c)!=EOF)
+    {
+        point p(a,b,c);
+        //printf("%f %f %f\n",p.x,p.y,p.z);
+        points_walkway_bottom_inner.push_back(p);
     }
 }
 
 int main(int argc, char **argv){
-    freopen("coordinates.txt","r",stdin);
-    freopen("output.txt","w",stdout);
+    freopen("coordinates_basement_bottom.txt","r",stdin);
     input();
+    fclose(stdin);
+    freopen("coordinates_basement_top.txt","r",stdin);
+    input2();
+    fclose(stdin);
+    freopen("coordinates_walkway_top_outer.txt","r",stdin);
+    input3();
+    fclose(stdin);
+    freopen("coordinates_walkway_top_inner.txt","r",stdin);
+    input4();
+    fclose(stdin);
+    freopen("coordinates_walkway_bottom_outer.txt","r",stdin);
+    input5();
+    fclose(stdin);
+    freopen("coordinates_walkway_bottom_inner.txt","r",stdin);
+    input6();
+    fclose(stdin);
+
 	glutInit(&argc,argv);
 	glutInitWindowSize(850, 700);
 	glutInitWindowPosition(0, 0);

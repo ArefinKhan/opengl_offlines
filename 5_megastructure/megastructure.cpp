@@ -27,6 +27,7 @@ struct point
 };
 vector <point> points_basement_bottom,points_basement_top,points_walkway_top_outer,points_walkway_top_inner;
 vector <point> points_walkway_bottom_outer,points_walkway_bottom_inner;
+vector <point> points_stairs;
 
 void drawAxes()
 {
@@ -220,7 +221,24 @@ void DRAW_BASEMENT()
         }glPopMatrix();
     }
 }
-
+void connect_top_bottom()
+{
+    int i,n;
+    n = points_walkway_bottom_outer.size() - 1;
+    point p1,p2;
+    for(i=0; i<=n; i++)
+    {
+        p1 = points_walkway_bottom_outer[i];
+        p2 = points_walkway_top_inner[i];
+        glPushMatrix();{
+            glColor3f(0, 0, 0);
+            glBegin(GL_LINES);{
+                glVertex3f(p1.x,p1.y,p1.z);
+                glVertex3f(p2.x,p2.y,p2.z);
+            }glEnd();
+        }glPopMatrix();
+    }
+}
 void DRAW_WALKWAY()
 {
     int i,n;
@@ -316,6 +334,13 @@ void DRAW_WALKWAY()
             glVertex3f(p2.x,p2.y,p2.z);
         }glEnd();
     }glPopMatrix();
+
+    connect_top_bottom();
+}
+
+void DRAW_STAIRS()
+{
+
 }
 
 void DRAW_WATERBODY()
@@ -355,6 +380,7 @@ void display(){
 
     DRAW_BASEMENT();
     DRAW_WALKWAY();
+    DRAW_STAIRS();
     //DRAW_WATERBODY();
 
 	/****************************
@@ -460,6 +486,16 @@ void input6()
         points_walkway_bottom_inner.push_back(p);
     }
 }
+void input7()
+{
+    double a,b,c;
+    while(scanf("%lf %lf %lf",&a,&b,&c)!=EOF)
+    {
+        point p(a,b,c);
+        //printf("%f %f %f\n",p.x,p.y,p.z);
+        points_stairs.push_back(p);
+    }
+}
 
 int main(int argc, char **argv){
     freopen("coordinates_basement_bottom.txt","r",stdin);
@@ -479,6 +515,9 @@ int main(int argc, char **argv){
     fclose(stdin);
     freopen("coordinates_walkway_bottom_inner.txt","r",stdin);
     input6();
+    fclose(stdin);
+    freopen("coordinates_stairs","r",stdin);
+    input7();
     fclose(stdin);
 
 	glutInit(&argc,argv);

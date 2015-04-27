@@ -19,15 +19,15 @@ struct point
 	double x,y,z;
 	point(double a,double b,double c)
 	{
-	    x = a/1000.0;
-	    y = b/1000.0;
-	    z = c/1000.0;
+	    x = a/700.0;
+	    y = b/700.0;
+	    z = c/700.0;
 	}
 	point() {}
 };
 vector <point> points_basement_bottom,points_basement_top,points_walkway_top_outer,points_walkway_top_inner;
 vector <point> points_walkway_bottom_outer,points_walkway_bottom_inner;
-vector <point> points_stairs;
+vector <point> points_stairs,points_waterbody,points_pillars;
 
 void drawAxes()
 {
@@ -342,26 +342,93 @@ void DRAW_WALKWAY()
 
 void DRAW_STAIRS()
 {
-    int i,n;
+    int i,n,j;
     n = points_stairs.size() - 1;
     point p1,p2;
-    for(i=1; i<=n; i+=2)
+    for(j=0; j<9; j++)
     {
-        p1 = points_stairs[i];
-        p2 = points_stairs[i-1];
         glPushMatrix();{
-            glColor3f(0, 0, 0);
-            glBegin(GL_LINES);{
-                glVertex3f(p1.x,p1.y,p1.z);
-                glVertex3f(p2.x,p2.y,p2.z);
-            }glEnd();
-        }glPopMatrix();
+            glRotatef(40*j,0,0,1);
+            for(i=1; i<=n; i+=2)
+            {
+                p1 = points_stairs[i];
+                p2 = points_stairs[i-1];
+                glPushMatrix();{
+                    glColor3f(0, 0, 0);
+                    glBegin(GL_LINES);{
+                        glVertex3f(p1.x,p1.y,p1.z);
+                        glVertex3f(p2.x,p2.y,p2.z);
+                    }glEnd();
+                }glPopMatrix();
+            }
+        } glPopMatrix();
     }
 }
 
 void DRAW_WATERBODY()
 {
+    int i,n,j;
+    n = points_waterbody.size() - 1;
+    point p1,p2;
+    for(j=0; j<9; j++)
+    {
+        glPushMatrix();{
+            glRotatef(40*j,0,0,1);
+            for(i=1; i<=n; i++)
+            {
+                p1 = points_waterbody[i];
+                p2 = points_waterbody[i-1];
+                glPushMatrix();{
+                    glColor3f(0, 0, 0);
+                    glBegin(GL_LINES);{
+                        glVertex3f(p1.x,p1.y,p1.z);
+                        glVertex3f(p2.x,p2.y,p2.z);
+                    }glEnd();
+                } glPopMatrix();
+            }
+        }glPopMatrix();
+    }
+}
 
+void DRAW_PILLARS()
+{
+    int i,n,j;
+    n = points_pillars.size() - 1;
+    point p1,p2,p3,p4;
+    for(j=0; j<9; j++)
+    {
+        glPushMatrix();{
+            glRotatef(40*j,0,0,1);
+            for(i=1; i<=16; i++)
+            {
+                p1 = points_pillars[i];
+                p2 = points_pillars[i-1];
+                glPushMatrix();{
+                    glColor3f(0, 0, 0);
+                    glBegin(GL_LINES);{
+                        glVertex3f(p1.x,p1.y,p1.z);
+                        glVertex3f(p2.x,p2.y,p2.z);
+                    }glEnd();
+                } glPopMatrix();
+            }
+            for(i=17; i<=29;i+=4)
+            {
+                p1 = points_pillars[i];
+                p2 = points_pillars[i+1];
+                p3 = points_pillars[i+2];
+                p4 = points_pillars[i+3];
+                glPushMatrix();{
+                    glColor3f(0, 0, 0);
+                    glBegin(GL_LINE_LOOP);{
+                        glVertex3f(p1.x,p1.y,p1.z);
+                        glVertex3f(p2.x,p2.y,p2.z);
+                        glVertex3f(p3.x,p3.y,p3.z);
+                        glVertex3f(p4.x,p4.y,p4.z);
+                    }glEnd();
+                } glPopMatrix();
+            }
+        }glPopMatrix();
+    }
 }
 
 void display(){
@@ -397,7 +464,8 @@ void display(){
     DRAW_BASEMENT();
     DRAW_WALKWAY();
     DRAW_STAIRS();
-    //DRAW_WATERBODY();
+    DRAW_WATERBODY();
+    DRAW_PILLARS();
 
 	/****************************
 	/ Add your objects from here
@@ -512,6 +580,26 @@ void input7()
         points_stairs.push_back(p);
     }
 }
+void input8()
+{
+    double a,b,c;
+    while(scanf("%lf %lf %lf",&a,&b,&c)!=EOF)
+    {
+        point p(a,b,c);
+        //printf("%f %f %f\n",p.x,p.y,p.z);
+        points_waterbody.push_back(p);
+    }
+}
+void input9()
+{
+    double a,b,c;
+    while(scanf("%lf %lf %lf",&a,&b,&c)!=EOF)
+    {
+        point p(a,b,c);
+        //printf("%f %f %f\n",p.x,p.y,p.z);
+        points_pillars.push_back(p);
+    }
+}
 
 int main(int argc, char **argv){
     freopen("coordinates_basement_bottom.txt","r",stdin);
@@ -534,6 +622,12 @@ int main(int argc, char **argv){
     fclose(stdin);
     freopen("coordinates_stairs.txt","r",stdin);
     input7();
+    fclose(stdin);
+    freopen("coordinates_waterbody.txt","r",stdin);
+    input8();
+    fclose(stdin);
+    freopen("coordinates_pillars.txt","r",stdin);
+    input9();
     fclose(stdin);
 
 	glutInit(&argc,argv);

@@ -5,7 +5,7 @@
 #include<GL/glut.h>
 using namespace std;
 #define pi 2*acos(0)
-
+#define ALL 9
 
 double cameraHeight;
 double cameraAngle;
@@ -27,7 +27,7 @@ struct point
 };
 vector <point> points_basement_bottom,points_basement_top,points_walkway_top_outer,points_walkway_top_inner;
 vector <point> points_walkway_bottom_outer,points_walkway_bottom_inner;
-vector <point> points_stairs,points_waterbody,points_pillars;
+vector <point> points_stairs,points_waterbody,points_pillars,points_railing;
 
 void drawAxes()
 {
@@ -345,7 +345,7 @@ void DRAW_STAIRS()
     int i,n,j;
     n = points_stairs.size() - 1;
     point p1,p2;
-    for(j=0; j<9; j++)
+    for(j=0; j<ALL; j++)
     {
         glPushMatrix();{
             glRotatef(40*j,0,0,1);
@@ -370,7 +370,7 @@ void DRAW_WATERBODY()
     int i,n,j;
     n = points_waterbody.size() - 1;
     point p1,p2;
-    for(j=0; j<9; j++)
+    for(j=0; j<ALL; j++)
     {
         glPushMatrix();{
             glRotatef(40*j,0,0,1);
@@ -395,7 +395,7 @@ void DRAW_PILLARS()
     int i,n,j;
     n = points_pillars.size() - 1;
     point p1,p2,p3,p4;
-    for(j=0; j<9; j++)
+    for(j=0; j<ALL; j++)
     {
         glPushMatrix();{
             glRotatef(40*j,0,0,1);
@@ -430,7 +430,57 @@ void DRAW_PILLARS()
         }glPopMatrix();
     }
 }
+void DRAW_RAILING()
+{
+    int i,n,j;
+    n = points_railing.size() - 1;
+    point p1,p2;
+    for(j=0; j<ALL; j++)
+    {
+        glPushMatrix();{
+            glRotatef(40*j,0,0,1);
+            for(i=1; i<=n; i++)
+            {
+                if(i%13==0) continue;
+                p1 = points_railing[i];
+                p2 = points_railing[i-1];
+                glPushMatrix();{
+                    glColor3f(0, 0, 0);
+                    glBegin(GL_LINES);{
+                        glVertex3f(p1.x,p1.y,p1.z);
+                        glVertex3f(p2.x,p2.y,p2.z);
+                    }glEnd();
+                } glPopMatrix();
+            }
+        }glPopMatrix();
+    }
+}
+void drawHollowCircle(GLfloat x, GLfloat y, GLfloat radius){
+	int i;
+	int lineAmount = 100; //# of triangles used to draw circle
 
+	//GLfloat radius = 0.8f; //radius
+	GLfloat twicePi = 2.0f * pi;
+	glBegin(GL_LINE_LOOP);
+		for(i = 0; i <= lineAmount;i++) {
+			glVertex2f(
+			    x + (radius * cos(i *  twicePi / lineAmount)),
+			    y + (radius* sin(i * twicePi / lineAmount))
+			);
+		}
+	glEnd();
+}
+void DRAW_CENTER()
+{
+    glPushMatrix();{
+        glTranslatef(0,0,2.792);
+        drawHollowCircle(0,0,27.466);
+    }glPopMatrix();
+    glPushMatrix();{
+        glTranslatef(0,0,3.8607+2.792);
+        drawHollowCircle(0,0,27.466);
+    }glPopMatrix();
+}
 void display(){
 
 	//clear the display
@@ -466,6 +516,8 @@ void display(){
     DRAW_STAIRS();
     DRAW_WATERBODY();
     DRAW_PILLARS();
+    DRAW_RAILING();
+    DRAW_CENTER();
 
 	/****************************
 	/ Add your objects from here
@@ -600,6 +652,16 @@ void input9()
         points_pillars.push_back(p);
     }
 }
+void input10()
+{
+    double a,b,c;
+    while(scanf("%lf %lf %lf",&a,&b,&c)!=EOF)
+    {
+        point p(a,b,c);
+        //printf("%f %f %f\n",p.x,p.y,p.z);
+        points_railing.push_back(p);
+    }
+}
 
 int main(int argc, char **argv){
     freopen("coordinates_basement_bottom.txt","r",stdin);
@@ -628,6 +690,9 @@ int main(int argc, char **argv){
     fclose(stdin);
     freopen("coordinates_pillars.txt","r",stdin);
     input9();
+    fclose(stdin);
+    freopen("coordinates_railing.txt","r",stdin);
+    input10();
     fclose(stdin);
 
 	glutInit(&argc,argv);

@@ -28,6 +28,7 @@ struct point
 vector <point> points_basement_bottom,points_basement_top,points_walkway_top_outer,points_walkway_top_inner;
 vector <point> points_walkway_bottom_outer,points_walkway_bottom_inner;
 vector <point> points_stairs,points_waterbody,points_pillars,points_railing;
+vector <point> points_structure1;
 
 void drawAxes()
 {
@@ -481,6 +482,63 @@ void DRAW_CENTER()
         drawHollowCircle(0,0,27.466);
     }glPopMatrix();
 }
+void DRAW_STRUCTURE1()
+{
+    int i,n,j;
+    n = points_structure1.size() - 1;
+    point p1,p2;
+    for(j=0; j<ALL; j++)
+    {
+        glPushMatrix();{
+            glRotatef(40*j,0,0,1);
+            for(i=1; i<=24; i++)
+            {
+                p1 = points_structure1[i];
+                p2 = points_structure1[i-1];
+                glPushMatrix();{
+                    glColor3f(0, 0, 0);
+                    glBegin(GL_LINES);{
+                        glVertex3f(p1.x,p1.y,p1.z);
+                        glVertex3f(p2.x,p2.y,p2.z);
+                    }glEnd();
+                } glPopMatrix();
+            }
+            for(i=26; i<=48; i++)
+            {
+                p1 = points_structure1[i];
+                p2 = points_structure1[i-1];
+                glPushMatrix();{
+                    glColor3f(0, 0, 0);
+                    glBegin(GL_LINES);{
+                        glVertex3f(p1.x,p1.y,p1.z);
+                        glVertex3f(p2.x,p2.y,p2.z);
+                    }glEnd();
+                } glPopMatrix();
+            }
+            p1 = points_structure1[12];
+            p2 = points_structure1[36];
+            glPushMatrix();{
+                glColor3f(0, 0, 0);
+                glBegin(GL_LINES);{
+                    glVertex3f(p1.x,p1.y,p1.z);
+                    glVertex3f(p2.x,p2.y,p2.z);
+                }glEnd();
+            } glPopMatrix();
+            for(i=50; i<=n; i++)
+            {
+                p1 = points_structure1[i];
+                p2 = points_structure1[i-1];
+                glPushMatrix();{
+                    glColor3f(0, 0, 0);
+                    glBegin(GL_LINES);{
+                        glVertex3f(p1.x,p1.y,p1.z);
+                        glVertex3f(p2.x,p2.y,p2.z);
+                    }glEnd();
+                } glPopMatrix();
+            }
+        }glPopMatrix();
+    }
+}
 void display(){
 
 	//clear the display
@@ -518,6 +576,7 @@ void display(){
     DRAW_PILLARS();
     DRAW_RAILING();
     DRAW_CENTER();
+    DRAW_STRUCTURE1();
 
 	/****************************
 	/ Add your objects from here
@@ -662,6 +721,16 @@ void input10()
         points_railing.push_back(p);
     }
 }
+void input11()
+{
+    double a,b,c;
+    while(scanf("%lf %lf %lf",&a,&b,&c)!=EOF)
+    {
+        point p(a,b,c);
+        //printf("%f %f %f\n",p.x,p.y,p.z);
+        points_structure1.push_back(p);
+    }
+}
 
 int main(int argc, char **argv){
     freopen("coordinates_basement_bottom.txt","r",stdin);
@@ -693,6 +762,9 @@ int main(int argc, char **argv){
     fclose(stdin);
     freopen("coordinates_railing.txt","r",stdin);
     input10();
+    fclose(stdin);
+    freopen("coordinates_structure_1.txt","r",stdin);
+    input11();
     fclose(stdin);
 
 	glutInit(&argc,argv);

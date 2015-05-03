@@ -3,6 +3,7 @@
 #include<math.h>
 #include <vector>
 #include<GL/glut.h>
+#include<glm/glm.hpp>
 using namespace std;
 #define pi 2*acos(0)
 #define ALL 9
@@ -30,6 +31,91 @@ vector <point> points_walkway_bottom_outer,points_walkway_bottom_inner;
 vector <point> points_stairs,points_stairs_railing,points_waterbody,points_pillars,points_railing;
 vector <point> points_structure1,points_structure2,points_center_tower,points_structure3;
 vector <point> points_structure1_pattern;
+
+class Camera
+{
+private:
+	glm::vec3 eye;
+	glm::vec3 u,v,n;
+	double viewAngle, aspect, nearDist, farDist;
+	void setModelviewMatrix();
+
+public:
+	void set(glm::vec3 eye, glm::vec3 look, glm::vec3 up);
+	void roll(double angle); // roll it
+	void pitch(double angle); // increase pitch
+	void yaw(double angle); // yaw it
+	void slide(float delU, float delV, float delN); // slide it
+};
+
+void Camera::setModelviewMatrix()
+{
+	float m[16];
+
+	m[0]=(float)u.x; m[4]=(float)u.y; m[8]=(float)u.z; m[12]=(float) -glm::dot(eye,u);
+	m[1]=(float)v.x; m[5]=(float)v.y; m[9]=(float)v.z; m[13]=(float) -glm::dot(eye,v);
+	m[2]=(float)n.x; m[6]=(float)n.y; m[10]=(float)n.z; m[14]=(float) -glm::dot(eye,n);
+	m[3]=0.0f; m[7]=0.0f; m[11]=0.0f; m[15]=1.0f;
+	glMatrixMode(GL_MODELVIEW);
+	glLoadMatrixf(m);
+
+}
+
+
+void Camera::set(glm::vec3 Eye, glm::vec3 look, glm::vec3 up)
+{
+	eye = Eye;
+	n = (eye - look);
+	u = glm::cross(up,n);
+	n = glm::normalize(n);
+	u = glm::normalize(u);
+	v = glm::cross(n,u);
+	setModelviewMatrix();
+
+}
+
+void Camera::slide(float delU, float delV, float delN)
+{
+	eye.x += delU * u.x + delV * v.x + delN * n.x;
+	eye.y += delU * u.y + delV * v.y + delN * n.y;
+	eye.z += delU * u.z + delV * v.z + delN * n.z;
+	setModelviewMatrix();
+}
+
+void Camera :: roll(double angle)
+{
+
+	float cs = cos(angle);
+	float sn = sin(angle);
+	glm::vec3 t = u;
+	u = glm::vec3(cs*t.x - sn*v.x, cs*t.y - sn*v.y, cs*t.z - sn*v.z);
+	v = glm::vec3(sn*t.x + cs*v.x, sn*t.y + cs*v.y, sn*t.z + cs*v.z);
+	setModelviewMatrix();
+}
+
+void Camera :: pitch(double angle)
+{
+
+	float cs = cos(angle);
+	float sn = sin(angle);
+	glm::vec3 t = v;
+	v = glm::vec3(cs*t.x - sn*n.x, cs*t.y - sn*n.y, cs*t.z - sn*n.z);
+	n = glm::vec3(sn*t.x + cs*n.x, sn*t.y + cs*n.y, sn*t.z + cs*n.z);
+	setModelviewMatrix();
+}
+
+void Camera :: yaw(double angle)
+{
+
+	float cs = cos(angle);
+	float sn = sin(angle);
+	glm::vec3 t = n;
+	n = glm::vec3(cs*t.x - sn*u.x, cs*t.y - sn*u.y, cs*t.z - sn*u.z);
+	u = glm::vec3(sn*t.x + cs*u.x, sn*t.y + cs*u.y, sn*t.z + cs*u.z);
+	setModelviewMatrix();
+}
+
+Camera cam;
 
 void drawAxes()
 {
@@ -84,10 +170,40 @@ void drawGrid()
 void keyboardListener(unsigned char key, int x,int y){
 	switch(key){
 
-		case '1':
-			drawgrid=1-drawgrid;
+			case '1':
+			{
+			cam.yaw(-0.05);
+			}
 			break;
 
+		case '2':
+			{
+			cam.yaw(0.05);
+			}
+			break;
+
+			case '3':
+			{
+			cam.pitch(-0.05);
+			}
+			break;
+
+		case '4':
+			{
+			cam.pitch(0.05);
+			}
+			break;
+		case '5':
+			{
+			cam.roll(0.05);
+			}
+			break;
+
+		case '6':
+			{
+			cam.roll(-0.05);
+			}
+			break;
 		default:
 			break;
 	}
@@ -97,22 +213,24 @@ void keyboardListener(unsigned char key, int x,int y){
 void specialKeyListener(int key, int x,int y){
 	switch(key){
 		case GLUT_KEY_DOWN:		//down arrow key
-			cameraHeight -= 1.0;
+			cam.slide(0.0f,0.0f,1.0f);
 			break;
 		case GLUT_KEY_UP:		// up arrow key
-			cameraHeight += 1.0;
+			cam.slide(0.0f,0.0f,-1.0f);
 			break;
 
 		case GLUT_KEY_RIGHT:
-		    cameraAngle += 0.03;
+			cam.slide(1.0f,0.0f,0.0f);
 			break;
 		case GLUT_KEY_LEFT:
-		    cameraAngle -= 0.03;
+			cam.slide(-1.0f,0.0f,0.0f);
 			break;
 
 		case GLUT_KEY_PAGE_UP:
+			cam.slide(0.0f,1.0f,0.0f);
 			break;
 		case GLUT_KEY_PAGE_DOWN:
+			cam.slide(0.0f,-1.0f,0.0f);
 			break;
 
 		case GLUT_KEY_INSERT:
@@ -658,10 +776,9 @@ void display(){
 	/ set-up camera here
 	********************/
 	//load the correct matrix -- MODEL-VIEW matrix
-	glMatrixMode(GL_MODELVIEW);
 
 	//initialize the matrix
-	glLoadIdentity();
+
 
 	//now give three info
 	//1. where is the camera (viewer)?
@@ -669,7 +786,6 @@ void display(){
 	//3. Which direction is the camera's UP direction?
 
 	//gluLookAt(100,100,100,	0,0,0,	0,0,1);
-	gluLookAt(100*cos(cameraAngle),100*sin(cameraAngle), cameraHeight,		0,0,0,		0,0,1);
 	//gluLookAt(0,-1,150,	0,0,0,	0,0,1);
 
 
@@ -960,6 +1076,12 @@ int main(int argc, char **argv){
 	glutKeyboardFunc(keyboardListener);
 	glutSpecialFunc(specialKeyListener);
 	glutMouseFunc(mouseListener);
+
+		//setting camera
+	glm::vec3 Eye = glm::vec3 (100.0f,100.0f,50.0f);
+	glm::vec3 look = glm::vec3 (0.0f,0.0f,0.0f);
+	glm::vec3 up = glm::vec3 (0.0f,0.0f,1.0f);
+	cam.set(Eye,look,up);
 
 	glutMainLoop();		//The main loop of OpenGL
 
